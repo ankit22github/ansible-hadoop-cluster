@@ -1,0 +1,91 @@
+- hosts: [namenode]
+  tasks:
+
+  - copy:
+      dest: "/root"
+      src: "/root/hadoop-1.2.1-1.x86_64.rpm"
+
+  - copy:
+      dest: "/root"
+      scr: "/root/jdk-8u171-linux-x64.rpm"
+
+  - command:
+      cmd: "rpm -i hadoop-1.2.1-1.x86_64.rpm"
+
+  - command:
+      cmd: "rpm -i jdk-8u171-linux-x64.rpm"
+
+  - file:
+      state: directory
+      path: "/nn"
+
+  - blockfile:
+      path: "/etc/hadoop/hdfs-site.xml"
+      insertafter: "<cofiguration>"
+      block: |
+         <property>
+         <name>dfs.name.dir</name>
+         <value>/nn</value>
+         </property>
+
+  - blockfile:
+      path: "/etc/hadoop/core-site.xml"
+      insertafter: "<cofiguration>"
+      block: |
+         <property>
+         <name>fs.default.name</name>
+         <value>hdfs://0.0.0.0:9001</value>
+         </property>
+
+  - command:
+      cmd: "hadoop namenode -format"
+
+  - command:
+      cmd: "hadoop-deamon.sh start namenode"
+
+  - service:
+      name: "firewalld"
+      state: stoped
+
+- hosts: [datanode]
+  tasks:
+
+  - copy:
+      dest: "/root"
+      src: "/root/hadoop-1.2.1-1.x86_64.rpm"
+
+  - copy:
+      dest: "/root"
+      scr: "/root/jdk-8u171-linux-x64.rpm"
+
+  - command:
+      cmd: "rpm -i hadoop-1.2.1-1.x86_64.rpm"
+
+  - command:
+      cmd: "rpm -i jdk-8u171-linux-x64.rpm"
+
+
+  - file:
+      state: directory
+      path: "/dn"
+
+  - blockfile:
+      path: "/etc/hadoop/hdfs-site.xml"
+      insertafter: "<cofiguration>"
+      block: |
+         <property>
+         <name>dfs.name.dir</name>
+         <value>/dn</value>
+         </property>
+  - blockfile:
+      path: "/etc/hadoop/core-site.xml"
+      insertafter: "<cofiguration>"
+      block: |
+         <property>
+         <name>fs.default.name</name>
+         <value>hdfs://192.168.29.181:9001</value>
+         </property>
+
+  - command:
+      cmd: "hadoop-deamon.sh start datanode"
+
